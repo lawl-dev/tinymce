@@ -31,10 +31,19 @@ const isEmpty = function (schema, nonEmptyElements, whitespaceElements, node) {
 
 const isLineBreakNode = (node, blockElements) => node && (blockElements[node.name] || node.name === 'br');
 
+const findLastChild = (node: Node, predicate: (value: Node) => boolean): Node | undefined => {
+  let result = node.lastChild;
+  while (result !== undefined && !predicate(result)) {
+    result = result.prev;
+  }
+  return result;
+};
+
 export {
   paddEmptyNode,
   isPaddedWithNbsp,
   hasOnlyChild,
   isEmpty,
-  isLineBreakNode
+  isLineBreakNode,
+  findLastChild
 };

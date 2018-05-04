@@ -10,7 +10,7 @@
 
 import LegacyFilter from '../../html/LegacyFilter';
 import * as ParserFilters from '../../html/ParserFilters';
-import { paddEmptyNode,  isPaddedWithNbsp,  hasOnlyChild, isEmpty, isLineBreakNode } from '../../html/ParserUtils';
+import { paddEmptyNode,  isPaddedWithNbsp,  hasOnlyChild, isEmpty, isLineBreakNode, findLastChild } from '../../html/ParserUtils';
 import Node from './Node';
 import SaxParser from './SaxParser';
 import Schema from './Schema';
@@ -441,7 +441,9 @@ export default function (settings?, schema = Schema()) {
         if (!isInWhiteSpacePreservedElement) {
           text = text.replace(allWhiteSpaceRegExp, ' ');
 
-          if (isLineBreakNode(node.lastChild, blockElements)) {
+          const lastChildNodeAComment = findLastChild(node, (x) => x.name !== '#comment');
+          const isTextNodeEndsWithWhitesapce = (lastChildNodeAComment !== undefined && lastChildNodeAComment.type === 3 && lastChildNodeAComment.value.endsWith(' '));
+          if (isLineBreakNode(lastChildNodeAComment, blockElements) || isTextNodeEndsWithWhitesapce) {
             text = text.replace(startWhiteSpaceRegExp, '');
           }
         }
