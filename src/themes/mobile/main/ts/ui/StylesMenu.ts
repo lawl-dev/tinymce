@@ -3,7 +3,7 @@ import {
     TieredMenu, Toggling, Transitioning
 } from '@ephox/alloy';
 import { Objects } from '@ephox/boulder';
-import { Arr, Merger, Obj } from '@ephox/katamari';
+import { Arr, Merger, Obj, Option } from '@ephox/katamari';
 import { Css, SelectorFind, Width } from '@ephox/sugar';
 
 import Receivers from '../channels/Receivers';
@@ -37,7 +37,7 @@ const convert = function (formats, memMenuThunk) {
 
   const menus = Merger.deepMerge(submenus, Objects.wrap('styles', mainMenu));
 
-  const tmenu = TieredMenu.tieredMenu.tieredData('styles', menus, formats.expansions);
+  const tmenu = TieredMenu.tieredData('styles', menus, formats.expansions);
 
   return {
     tmenu
@@ -104,7 +104,7 @@ const makeMenu = function (value, items, memMenuThunk, collapsable) {
         action (item) {
           if (collapsable) {
             const comp = memMenuThunk().get(item);
-            TieredMenu.tieredMenu.collapseMenu(comp);
+            TieredMenu.collapseMenu(comp);
           }
         }
       }),
@@ -155,7 +155,7 @@ const sketch = function (settings) {
   });
   // Turn settings into a tiered menu data.
 
-  const memMenu = Memento.record(TieredMenu.tieredMenu.sketch({
+  const memMenu = Memento.record(TieredMenu.sketch({
     dom: {
       tag: 'div',
       classes: [ Styles.resolve('styles-menu') ]
@@ -170,8 +170,10 @@ const sketch = function (settings) {
     onExecute (tmenu, item) {
       const v = Representing.getValue(item);
       settings.handle(item, v.value);
+      return Option.none();
     },
     onEscape () {
+      return Option.none();
     },
     onOpenMenu (container, menu) {
       const w = Width.get(container.element());

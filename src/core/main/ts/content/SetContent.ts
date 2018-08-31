@@ -18,6 +18,9 @@ import Settings from 'tinymce/core/api/Settings';
 import EditorFocus from 'tinymce/core/focus/EditorFocus';
 import CaretFinder from 'tinymce/core/caret/CaretFinder';
 import NodeType from 'tinymce/core/dom/NodeType';
+import { Element } from '@ephox/sugar';
+import { isWsPreserveElement } from 'tinymce/core/dom/ElementType';
+import { HTMLElement } from '@ephox/dom-globals';
 
 const defaultFormat = 'html';
 
@@ -86,7 +89,7 @@ const setContentString = (editor: Editor, body: HTMLElement, content: string, ar
       );
     }
 
-    args.content = Tools.trim(content);
+    args.content = isWsPreserveElement(Element.fromDom(body)) ? content : Tools.trim(content);
     setEditorHtml(editor, args.content);
 
     if (!args.no_events) {
@@ -102,7 +105,7 @@ const setContentTree = (editor: Editor, body: HTMLElement, content: Node, args: 
 
   const html = Serializer({ validate: editor.validate }, editor.schema).serialize(content);
 
-  args.content = Tools.trim(html);
+  args.content = isWsPreserveElement(Element.fromDom(body)) ? html : Tools.trim(html);
   setEditorHtml(editor, args.content);
 
   if (!args.no_events) {

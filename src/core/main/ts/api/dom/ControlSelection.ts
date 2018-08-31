@@ -8,7 +8,7 @@
  * Contributing: http://www.tinymce.com/contributing
  */
 
-import { Element, Selectors } from '@ephox/sugar';
+import { Element as SugarElement, Selectors } from '@ephox/sugar';
 import NodeType from '../../dom/NodeType';
 import RangePoint from '../../dom/RangePoint';
 import Env from '../Env';
@@ -18,6 +18,7 @@ import VK from '../util/VK';
 import { Selection } from './Selection';
 import { Editor } from 'tinymce/core/api/Editor';
 import Events from 'tinymce/core/api/Events';
+import { Element, Event, Node, document } from '@ephox/dom-globals';
 
 interface ControlSelection {
   isResizable: (elm: Element) => boolean;
@@ -161,7 +162,7 @@ const ControlSelection = (selection: Selection, editor: Editor): ControlSelectio
       return false;
     }
 
-    return Selectors.is(Element.fromDom(elm), selector);
+    return Selectors.is(SugarElement.fromDom(elm), selector);
   };
 
   const resizeGhostElement = function (e) {
@@ -369,7 +370,8 @@ const ControlSelection = (selection: Selection, editor: Editor): ControlSelectio
 
         // Hides IE move layer cursor
         // If we set it on Chrome we get this wounderful bug: #6725
-        if (Env.ie) {
+        // Edge doesn't have this issue however setting contenteditable will move the selection to that element on Edge 17 see #TINY-1679
+        if (Env.ie === 11) {
           handleElm.contentEditable = false;
         }
 

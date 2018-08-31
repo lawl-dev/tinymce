@@ -12,6 +12,7 @@ import { Throttler } from '@ephox/katamari';
 import { PlatformDetection } from '@ephox/sand';
 import DOMUtils from '../api/dom/DOMUtils';
 import SelectionBookmark from './SelectionBookmark';
+import { document } from '@ephox/dom-globals';
 
 const isManualNodeChange = function (e) {
   return e.type === 'nodechange' && e.selectionChange;
@@ -44,7 +45,7 @@ const registerMouseUp = function (editor, throttledStore) {
 const registerEditorEvents = function (editor, throttledStore) {
   const browser = PlatformDetection.detect().browser;
 
-  if (browser.isIE() || browser.isEdge()) {
+  if (browser.isIE()) {
     registerFocusOut(editor);
   } else {
     registerMouseUp(editor, throttledStore);

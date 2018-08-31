@@ -20,6 +20,7 @@ import { Selection } from './dom/Selection';
 import * as IndentOutdent from 'tinymce/core/commands/IndentOutdent';
 import { Editor } from 'tinymce/core/api/Editor';
 import { DOMUtils } from 'tinymce/core/api/dom/DOMUtils';
+import { HTMLElement } from '@ephox/dom-globals';
 
 /**
  * This class enables you to add custom editor commands and it contains
@@ -530,17 +531,21 @@ export default function (editor: Editor) {
     }
   });
 
+  const alignStates = (name: string) => () => {
+    const nodes = selection.isCollapsed() ? [dom.getParent(selection.getNode(), dom.isBlock)] : selection.getSelectedBlocks();
+    const matches = map(nodes, function (node) {
+        return !!formatter.matchNode(node, name);
+      });
+    return inArray(matches, true) !== -1;
+  };
+
   // Add queryCommandState overrides
   addCommands({
     // Override justify commands
-    'JustifyLeft,JustifyCenter,JustifyRight,JustifyFull' (command) {
-      const name = 'align' + command.substring(7);
-      const nodes = selection.isCollapsed() ? [dom.getParent(selection.getNode(), dom.isBlock)] : selection.getSelectedBlocks();
-      const matches = map(nodes, function (node) {
-        return !!formatter.matchNode(node, name);
-      });
-      return inArray(matches, true) !== -1;
-    },
+    'JustifyLeft': alignStates('alignleft'),
+    'JustifyCenter': alignStates('aligncenter'),
+    'JustifyRight': alignStates('alignright'),
+    'JustifyFull': alignStates('alignjustify'),
 
     'Bold,Italic,Underline,Strikethrough,Superscript,Subscript' (command) {
       return isFormatMatch(command);

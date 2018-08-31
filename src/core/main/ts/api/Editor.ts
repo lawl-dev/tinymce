@@ -29,6 +29,8 @@ import * as EditorRemove from '../EditorRemove';
 import SelectionOverrides from 'tinymce/core/SelectionOverrides';
 import Schema from 'tinymce/core/api/html/Schema';
 import { UndoManager } from 'tinymce/core/api/UndoManager';
+import { Annotator } from 'tinymce/core/api/Annotator';
+import { HTMLElement, Document, Window, Element, HTMLInputElement, HTMLTextAreaElement } from '@ephox/dom-globals';
 
 /**
  * Include the base event class documentation.
@@ -60,6 +62,7 @@ export type AnyFunction = (...x: any[]) => any;
 
 export interface Editor {
   $: any;
+  annotator: Annotator;
   baseURI: any;
   bodyElement: HTMLElement;
   bookmark: any;
@@ -167,7 +170,7 @@ export interface Editor {
   queryCommandValue(cmd: string): any;
   remove(): void;
   render(): void;
-  save(args?): void;
+  save(args?: SaveArgs): void;
   setContent(content: EditorContent.Content, args?: EditorContent.SetContentArgs): void;
   setDirty(state: boolean): void;
   setMode(mode: string): void;
@@ -178,6 +181,16 @@ export interface Editor {
   unbindAllNativeEvents(): void;
   uploadImages(callback): void;
   _scanForImages(): void;
+}
+
+export interface SaveArgs {
+  is_removing?: boolean;
+  save?: boolean;
+  element?: Element;
+  content?: any;
+  no_events?: boolean;
+  format?: 'raw';
+  set_dirty?: boolean;
 }
 
 // Shorten these names
@@ -865,8 +878,8 @@ Editor.prototype = {
    * @param {Object} args Optional content object, this gets passed around through the whole save process.
    * @return {String} HTML string that got set into the textarea/div.
    */
-  save (args) {
-    const self = this;
+  save (args: SaveArgs) {
+    const self: Editor = this;
     let elm = self.getElement(), html, form;
 
     if (!elm || !self.initialized || self.removed) {
@@ -891,8 +904,7 @@ Editor.prototype = {
     html = args.content;
 
     if (!/TEXTAREA|INPUT/i.test(elm.nodeName)) {
-      // Update DIV element when not in inline mode
-      if (!self.inline) {
+      if (args.is_removing || !self.inline) {
         elm.innerHTML = html;
       }
 
@@ -906,7 +918,7 @@ Editor.prototype = {
         });
       }
     } else {
-      elm.value = html;
+      (elm as HTMLInputElement | HTMLTextAreaElement).value = html;
     }
 
     args.element = elm = null;

@@ -12,6 +12,7 @@ import Tools from 'tinymce/core/api/util/Tools';
 import Env from 'tinymce/core/api/Env';
 import { Editor } from 'tinymce/core/api/Editor';
 import { Cell } from '@ephox/katamari';
+import { Element, document, HTMLElement, Range } from '@ephox/dom-globals';
 
 // We can't attach the pastebin to a H1 inline element on IE since it won't allow H1 or other
 // non valid parents to be pasted into the pastebin so we need to attach it to the body
@@ -21,12 +22,12 @@ const getPasteBinParent = (editor: Editor): Element => {
 
 const isExternalPasteBin = (editor: Editor) => getPasteBinParent(editor) !== editor.getBody();
 
-const delegatePasteEvents = (editor: Editor, pasteBinElm: Element) => {
+const delegatePasteEvents = (editor: Editor, pasteBinElm: Element, pasteBinDefaultContent: string) => {
   if (isExternalPasteBin(editor)) {
     editor.dom.bind(pasteBinElm, 'paste keyup', function (e) {
-      setTimeout(() => {
+      if (!isDefault(editor, pasteBinDefaultContent)) {
         editor.fire('paste');
-      }, 0);
+      }
     });
   }
 };
@@ -61,7 +62,7 @@ const create = (editor: Editor, lastRngCell, pasteBinDefaultContent: string) => 
     e.stopPropagation();
   });
 
-  delegatePasteEvents(editor, pasteBinElm);
+  delegatePasteEvents(editor, pasteBinElm, pasteBinDefaultContent);
 
   pasteBinElm.focus();
   editor.selection.select(pasteBinElm, true);
